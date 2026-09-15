@@ -9,16 +9,12 @@ import java.util.Scanner;
 
 public class MemberInterface {
 
+    private final MemberDao memberDao;
     public MemberInterface() {
-        try {
-            memberManagement();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        memberDao = new MemberDao();
+        memberManagement();
     }
-
-    private void memberManagement() throws SQLException {
+    private void memberManagement() {
         Scanner sc = new Scanner(System.in);
         System.out.println("╔══════════════════════════════════╗");
         System.out.println("║       MEMBER MANAGEMENT          ║");
@@ -52,7 +48,7 @@ public class MemberInterface {
         }
     }
 
-    private void updateMember() throws SQLException {
+    private void updateMember(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter ID");
         int id = sc.nextInt();
@@ -70,20 +66,20 @@ public class MemberInterface {
                 case "1":
                     System.out.println("Enter new First Name");
                     String firstName = sc.nextLine();
-                    MemberDao.updateFirstname(firstName, id);
+                    memberDao.updateFirstname(firstName, id);
                     break;
                 case "2":
                     System.out.println("Enter new last Name");
                     String lastname = sc.nextLine();
-                    MemberDao.updateLastname(lastname, id);
+                    memberDao.updateLastname(lastname, id);
                     break;
                 case "3":
                     System.out.println("Enter new status Active or Inactive");
                     String status = sc.nextLine();
                     if (status.equalsIgnoreCase("Inactive")) {
-                        MemberDao.updateStatus(false, id);
+                        memberDao.updateStatus(false, id);
                     } else if (status.equalsIgnoreCase("active")) {
-                        MemberDao.updateStatus(true, id);
+                        memberDao.updateStatus(true, id);
                     } else {
                         System.out.println("Invalid input");
                         run = true;
@@ -95,7 +91,7 @@ public class MemberInterface {
                 case "4":
                     System.out.println("Enter new First Name");
                     String email = sc.nextLine();
-                    MemberDao.updateEmail(email, id);
+                    memberDao.updateEmail(email, id);
                     break;
                 default:
                     System.out.println("Invalid input");
@@ -119,7 +115,7 @@ public class MemberInterface {
                 case "1":
                     System.out.println("enter ID");
                     int id = sc.nextInt();
-                    Member me = MemberDao.findById(id);
+                    Member me = memberDao.findById(id);
                     if (me != null) {
                         printMember(me);
                     }else{
@@ -130,7 +126,7 @@ public class MemberInterface {
                 case "2":
                     System.out.println("enter name");
                     String name = sc.nextLine();
-                    member = MemberDao.findByName(name);
+                    member = memberDao.findByName(name);
                     if (member != null) {
                         for (Member m : member) {
                             printMember(m);
@@ -139,7 +135,7 @@ public class MemberInterface {
                     run = false;
                     break;
                 case "3":
-                    member = MemberDao.findAll();
+                    member = memberDao.findAll();
                     for (Member m : member) {
                         printMember(m);
                     }
@@ -162,13 +158,11 @@ public class MemberInterface {
         newMem.setLastName(sc.nextLine());
         System.out.println("Enter member email");
         newMem.setEmail(sc.nextLine());
-        MemberDao.createMember(newMem);
+        memberDao.createMember(newMem);
 
     }
 
     private void printMember(Member m) {
         System.out.println(m.getId() + ": " + m.getFirstName() + " " + m.getLastName() + " || " + m.getEmail() + " || " + m.getJoinDate() + "IsActive:" + m.isActive());
     }
-
-
 }

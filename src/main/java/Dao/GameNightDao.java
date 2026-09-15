@@ -13,130 +13,155 @@ import java.util.List;
 public class GameNightDao {
     private Connection con;
 
-    public GameNightDao() throws SQLException {
-        con = (org.mariadb.jdbc.Connection) DriverManager.getConnection("jdbc:mariadb://localhost:3306/boardgame_club", "root", "secret");
+    public GameNightDao(){
+        try {
+            con = (org.mariadb.jdbc.Connection) DriverManager.getConnection("jdbc:mariadb://localhost:3306/boardgame_club", "root", "secret");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public gameNight findGameNight(int ID) throws SQLException {
-        String sql = "select * from game_nights where ID = ?";
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setInt(1, ID);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new gameNight(
-                    rs.getInt("ID"),
-                    rs.getDate("date"),
-                    rs.getTime("starttime"),
-                    rs.getString("location"),
-                    getMembers(ID),
-                    getGames(ID)
-            );
+    public gameNight findGameNight(int ID) {
+        try {
+            String sql = "select * from game_night where ID = ?";
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, ID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new gameNight(
+                        rs.getInt("ID"),
+                        rs.getDate("date"),
+                        rs.getTime("start_time"),
+                        rs.getString("location"),
+                        getMembers(ID),
+                        getGames(ID)
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
-    public List<gameNight> listGameNights() throws SQLException {
+
+    public List<gameNight> listGameNights(){
         List<gameNight> gameNights = new ArrayList<>();
-        String sql = "select * from game_nights";
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);;
-        ResultSet rs = ps.executeQuery();
-        while(rs.next()) {
-            gameNights.add(new gameNight(
-                    rs.getInt("ID"),
-                    rs.getDate("date"),
-                    rs.getTime("starttime"),
-                    rs.getString("location"),
-                    getMembers(rs.getInt("ID")),
-                    getGames(rs.getInt("ID"))
-            ));
+        try {
+            String sql = "select * from game_night";
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                gameNights.add(new gameNight(
+                        rs.getInt("ID"),
+                        rs.getDate("date"),
+                        rs.getTime("start_time"),
+                        rs.getString("location"),
+                        getMembers(rs.getInt("ID")),
+                        getGames(rs.getInt("ID"))
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return gameNights;
     }
 
-    public void createGameNight(String Date, String starttime, String members, String games, String location) throws SQLException {
-        String sql = "INSERT INTO game_nights (date, starttime, location) VALUES (?, ?, ?)";
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setDate(1, java.sql.Date.valueOf(LocalDate.parse(Date)));
-        ps.setTime(2, java.sql.Time.valueOf(LocalTime.parse(starttime)));
-        ps.setString(3, location);
-        ps.executeUpdate();
+    public void createGameNight(String Date, String starttime, String members, String games, String location) {
+        try {
+            String sql = "INSERT INTO game_night (date, start_time, location) VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setDate(1, java.sql.Date.valueOf(LocalDate.parse(Date)));
+            ps.setTime(2, java.sql.Time.valueOf(LocalTime.parse(starttime)));
+            ps.setString(3, location);
+            ps.executeUpdate();
 
-        int id = 0;
-        ResultSet rs = ps.getGeneratedKeys();
-        if (rs.next()) {
-            id=rs.getInt(1);
-        }
+            int id = 0;
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
 
-        PreparedStatement ps1 = con.prepareStatement("INSERT INTO night_members (gamenight_id, member_id) VALUES (?, ?)");
-        for(int i : parseIds(members)) {
-            ps1.setInt(1, id);
-            ps1.setInt(2, i);
-            ps1.executeUpdate();
-        }
-        PreparedStatement ps2 = con.prepareStatement("INSERT INTO night_games (gamenight_id, game_id) VALUES (?, ?)");
-        for(int i : parseIds(games)) {
-            ps2.setInt(1, id);
-            ps2.setInt(2, i);
-            ps2.executeUpdate();
+            PreparedStatement ps1 = con.prepareStatement("INSERT INTO night_member (game_night_ID, member_ID) VALUES (?, ?)");
+            for (int i : parseIds(members)) {
+                ps1.setInt(1, id);
+                ps1.setInt(2, i);
+                ps1.executeUpdate();
+            }
+            PreparedStatement ps2 = con.prepareStatement("INSERT INTO night_game (game_night_ID, game_ID) VALUES (?, ?)");
+            for (int i : parseIds(games)) {
+                ps2.setInt(1, id);
+                ps2.setInt(2, i);
+                ps2.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private List<Member> getMembers(int ID) throws SQLException {
+    private List<Member> getMembers(int ID) {
         List<Member> members = new ArrayList<>();
         List<Integer> mem = new ArrayList<Integer>();
-        String sql = "select * from night_members where gamenight_id = ?";
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setInt(1, ID);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            mem.add(rs.getInt("member_id"));
-        }
-        ps.close();
-        String sql1 = "SELECT * FROM members WHERE member_id = ?";
-        PreparedStatement ps1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
-        for (Integer i : mem) {
-            ps1.setInt(1, i);
-            ResultSet rs1 = ps1.executeQuery();
-            while (rs1.next()) {
-                Member m = new Member(
-                        rs1.getInt("member_id"),
-                        rs1.getString("first_name"),
-                        rs1.getString("last_name"),
-                        rs1.getString("email"),
-                        rs1.getDate("join_date"),
-                        rs1.getBoolean("is_active")
-                        );
-                members.add(m);
+        try {
+            String sql = "select * from night_member where game_night_ID = ?";
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, ID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                mem.add(rs.getInt("member_ID"));
             }
+            ps.close();
+            String sql1 = "SELECT * FROM member WHERE ID = ?";
+            PreparedStatement ps1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+            for (Integer i : mem) {
+                ps1.setInt(1, i);
+                ResultSet rs1 = ps1.executeQuery();
+                while (rs1.next()) {
+                    Member m = new Member(
+                            rs1.getInt("ID"),
+                            rs1.getString("first_name"),
+                            rs1.getString("last_name"),
+                            rs1.getString("email"),
+                            rs1.getDate("join_date"),
+                            rs1.getBoolean("is_active")
+                    );
+                    members.add(m);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return members;
     }
 
-    private List<Game> getGames(int ID) throws SQLException {
+    private List<Game> getGames(int ID){
         List<Game> games = new ArrayList<>();
         List<Integer> gamesID = new ArrayList<>();
-        String sql = "select * from night_games where gamenight_id = ?";
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setInt(1, ID);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            gamesID.add(rs.getInt("game_id"));
-        }
-        String sql1 = "SELECT * FROM board_games WHERE game_id = ?";
-        PreparedStatement ps1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
-        for (Integer i : gamesID) {
-            ps1.setInt(1, i);
-            ResultSet rs1 = ps1.executeQuery();
-            while (rs1.next()) {
-                games.add(new Game(
-                        rs1.getInt("game_id"),
-                        rs1.getString("title"),
-                        rs1.getInt("publisher_ID"),
-                        rs1.getInt("release_year"),
-                        rs1.getInt("maxplayercount"),
-                        rs1.getInt("minplayercount"),
-                        rs1.getInt("average_playing_time")
-                ));
+        try {
+            String sql = "select * from night_game where game_night_ID = ?";
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, ID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                gamesID.add(rs.getInt("game_ID"));
             }
+            String sql1 = "SELECT * FROM board_game WHERE ID = ?";
+            PreparedStatement ps1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+            for (Integer i : gamesID) {
+                ps1.setInt(1, i);
+                ResultSet rs1 = ps1.executeQuery();
+                while (rs1.next()) {
+                    games.add(new Game(
+                            rs1.getInt("ID"),
+                            rs1.getString("title"),
+                            rs1.getInt("publisher_ID"),
+                            rs1.getInt("release_year"),
+                            rs1.getInt("max_player"),
+                            rs1.getInt("min_player"),
+                            rs1.getInt("average_play_time")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return games;
     }

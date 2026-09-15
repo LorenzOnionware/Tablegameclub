@@ -8,68 +8,91 @@ import java.util.List;
 
 public class GameDao {
     private static Connection con;
-    public GameDao() throws SQLException {
-        con = DriverManager.getConnection("jdbc:mariadb://localhost:3306/boardgame_club", "root", "secret");
+    public GameDao() {
+        try {
+            con = DriverManager.getConnection("jdbc:mariadb://localhost:3306/boardgame_club", "root", "secret");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
+    public Game searchByName(String Name) {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("SELECT * FROM board_game WHERE title = ?");
+            ps.setString(1, Name);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Game(rs.getInt("ID"), Name, rs.getInt("publisher_ID"), rs.getInt("release_year"), rs.getInt("max_player"), rs.getInt("min_player"), rs.getInt("average_play_time"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+    public Game searchById(int id) {
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM board_game WHERE ID = ?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Game(id, rs.getString("title"), rs.getInt("publisher_ID"), rs.getInt("release_year"), rs.getInt("max_player"), rs.getInt("min_player"), rs.getInt("average_play_time"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+    public List<Game> searchByPublisher(int id){
+        List<Game> games = new ArrayList<>();
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM board_game WHERE publisher_ID = ?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Game g = new Game(
+                        rs.getInt("ID"),
+                        rs.getString("title"),
+                        rs.getInt("publisher_ID"),
+                        rs.getInt("release_year"),
+                        rs.getInt("max_player"),
+                        rs.getInt("min_player"),
+                        rs.getInt("average_play_time")
+                );
+                games.add(g);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return games;
+    }
+    public List<Game> getAllGames() {
+        List<Game> games = new ArrayList<>();
+        try{
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM board_game");
+            ResultSet rs = ps.executeQuery();
 
-    public static Game searchByName(String Name) throws SQLException {
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM board_games WHERE title =?");
-        ps.setString(1, Name);
-        ResultSet rs = ps.executeQuery();
-        if(rs.next()){
-            return new Game(rs.getInt("game_id"), Name,rs.getInt("publisher_id"), rs.getInt("release_year"), rs.getInt("maxplayercount"), rs.getInt("minplayercount"), rs.getInt("average_playing_time"));
-        }
-        return null;
-    }
-    public static Game searchById(int id) throws SQLException {
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM board_games WHERE game_id = ?");
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new Game(id, rs.getString("title"), rs.getInt("publisher_id"), rs.getInt("release_year"), rs.getInt("maxplayercount"), rs.getInt("minplayercount"), rs.getInt("average_playing_time"));
-        }
-        return null;
-    }
-    public static List<Game> searchByPublisher(int id) throws SQLException {
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM board_games WHERE publisher_id = ?");
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-        List<Game> games = new ArrayList<>();
-        while (rs.next()) {
-            Game g = new Game(
-                    rs.getInt("game_id"),
-                    rs.getString("title"),
-                    rs.getInt("publisher_id"),
-                    rs.getInt("release_year"),
-                    rs.getInt("maxplayercount"),
-                    rs.getInt("minplayercount"),
-                    rs.getInt("average_playing_time")
-            );
-            games.add(g);
+            while (rs.next()) {
+                Game g = new Game(
+                        rs.getInt("ID"),
+                        rs.getString("title"),
+                        rs.getInt("publisher_ID"),
+                        rs.getInt("release_year"),
+                        rs.getInt("max_player"),
+                        rs.getInt("min_player"),
+                        rs.getInt("average_play_time")
+                );
+                games.add(g);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return games;
     }
-    public static List<Game> getAllGames() throws SQLException {
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM board_games");
-        ResultSet rs = ps.executeQuery();
-        List<Game> games = new ArrayList<>();
-        while (rs.next()) {
-            Game g = new Game(
-                    rs.getInt("game_id"),
-                    rs.getString("title"),
-                    rs.getInt("publisher_id"),
-                    rs.getInt("release_year"),
-                    rs.getInt("maxplayercount"),
-                    rs.getInt("minplayercount"),
-                    rs.getInt("average_playing_time")
-            );
-            games.add(g);
-        }
-        return games;
-    }
-    public static void createGame(Game game) throws SQLException {
-        String sql = "INSERT INTO board_games (title, release_year, minplayercount, maxplayercount, average_playing_time, publisher_ID) VALUES (?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+    public void createGame(Game game) {
+        try {
+            String sql = "INSERT INTO board_game (title, release_year, min_player, max_player, average_playing_time, publisher_ID) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, game.getTitle());
             ps.setInt(2, game.getReleaseYear());
             ps.setInt(3, game.getMinPlayers());
@@ -77,5 +100,9 @@ public class GameDao {
             ps.setInt(5, game.getAveragePlayingTime());
             ps.setInt(6, game.getPublisherID());
             ps.executeUpdate();
+        } catch (SQLException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,11 +1,10 @@
-
 USE boardgame_club;
-INSERT INTO publishers (name) VALUES
+INSERT INTO publisher (name) VALUES
                                   ('KOSMOS'),
                                   ('Catan Studio'),
                                   ('Days of Wonder'),
                                   ('Asmodee');
-INSERT INTO members (first_name, last_name, email, join_date) VALUES
+INSERT INTO member (first_name, last_name, email, join_date) VALUES
                                                                   ('Anna',     'Meier',    'anna.meier@example.com',    '2024-03-15'),
                                                                   ('Ben',      'Keller',   'ben.keller@example.com',    '2024-05-02'),
                                                                   ('Carolin',  'Schmidt',  'carolin.schmidt@example.com','2024-06-20'),
@@ -17,7 +16,7 @@ INSERT INTO members (first_name, last_name, email, join_date) VALUES
                                                                   ('Isabel',   'Frei',     'isabel.frei@example.com',   '2025-10-30'),
                                                                   ('Jonas',    'Steiner',  'jonas.steiner@example.com', '2026-08-25');
 
-INSERT INTO board_games (title, release_year, minplayercount, maxplayercount, average_playing_time, publisher_ID) VALUES
+INSERT INTO board_game (title, release_year, min_player, max_playeR, average_play_time, publisher_ID) VALUES
                                                                                                                       ('Catan',                 1995, 3, 4,  90, 2),
                                                                                                                       ('Carcassonne',           2000, 2, 5,  45, 1),
                                                                                                                       ('Ticket to Ride',        2004, 2, 5,  60, 3),
@@ -28,7 +27,7 @@ INSERT INTO board_games (title, release_year, minplayercount, maxplayercount, av
                                                                                                                       ('Codenames',             2015, 4, 8,  15, 2),
                                                                                                                       ('Dominion',              2008, 2, 4,  30, 1),
                                                                                                                       ('Terraforming Mars',     2016, 1, 5, 120, 2);
-INSERT INTO game_nights (date, starttime, location) VALUES
+INSERT INTO game_night (date, start_time, location) VALUES
                                                         ('2025-06-05', '18:30:00', 'Vereinshaus, Raum 1'),
                                                         ('2025-06-19', '18:30:00', 'Vereinshaus, Raum 1'),
                                                         ('2025-07-03', '19:00:00', 'Café Zentral'),
@@ -40,7 +39,7 @@ INSERT INTO game_nights (date, starttime, location) VALUES
                                                         ('2025-12-11', '17:00:00', 'Weihnachtsfeier, Saal'),
                                                         ('2026-01-08', '18:30:00', 'Vereinshaus, Raum 1');
 
-INSERT INTO night_members (gamenight_id, member_id) VALUES
+INSERT INTO night_member (game_night_ID, member_ID) VALUES
 (1, 1), (1, 2), (1, 3),
 (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6),
 (3, 4), (3, 5),
@@ -52,7 +51,7 @@ INSERT INTO night_members (gamenight_id, member_id) VALUES
 (9, 1), (9, 2), (9, 3), (9, 4), (9, 5), (9, 6), (9, 8), (9, 9),
 (10, 1), (10, 6), (10, 9);
 
-INSERT INTO night_games (gamenight_id, game_id) VALUES
+INSERT INTO night_game (game_night_ID, game_ID) VALUES
 (1, 1), (1, 2), (1, 3),
 (2, 2), (2, 5), (2, 6),
 (3, 4),

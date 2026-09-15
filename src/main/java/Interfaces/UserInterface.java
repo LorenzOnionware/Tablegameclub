@@ -1,8 +1,8 @@
 package Interfaces;
 import java.util.*;
 
-public class userInterface {
-    public userInterface(){
+public class UserInterface {
+    public UserInterface(){
         Scanner sc = new Scanner(System.in);
         System.out.println("╔══════════════════════════════════╗");
         System.out.println("║       Tablegame Management       ║");

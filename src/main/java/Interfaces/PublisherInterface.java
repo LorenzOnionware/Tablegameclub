@@ -8,15 +8,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class PublisherInterface {
+    private final PublisherDao publisherDao;
+
     public PublisherInterface() {
-        try {
-            publisherManagement();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        publisherDao = new PublisherDao();
+        publisherManagement();
     }
-    private void publisherManagement() throws SQLException {
+    private void publisherManagement(){
         Scanner sc = new Scanner(System.in);
         System.out.println("╔══════════════════════════════════╗");
         System.out.println("║       PUBLISHER MANAGEMENT       ║");
@@ -56,35 +54,35 @@ public class PublisherInterface {
         }
     }
 
-    private void findPublisherByID() throws SQLException {
+    private void findPublisherByID(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter ID");
         int id = sc.nextInt();
-        Publisher p = PublisherDao.findByID(id);
+        Publisher p = publisherDao.findByID(id);
         System.out.println(" ");
         System.out.println(p.getId());
         System.out.println(p.getName());
     }
-    private void findPublisher() throws SQLException {
+    private void findPublisher(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter Publisher Name");
         String name = sc.nextLine();
-        Publisher p = PublisherDao.findByName(name);
+        Publisher p = publisherDao.findByName(name);
 
         System.out.println(" ");
         System.out.println(p.getId());
         System.out.println(p.getName());
 
     }
-    private void createPublisher() throws SQLException {
+    private void createPublisher(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter Publisher Name");
         String name = sc.nextLine();
-        PublisherDao.createPublisher(name);
+        publisherDao.createPublisher(name);
     }
-    private void listPublisher() throws SQLException {
+    private void listPublisher(){
         Scanner sc = new Scanner(System.in);
-        List<Publisher> list = PublisherDao.listPublisher();
+        List<Publisher> list = publisherDao.listPublisher();
         System.out.println(" ");
         for (Publisher p : list) {
             System.out.println(p.getId());

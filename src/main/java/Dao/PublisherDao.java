@@ -7,46 +7,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PublisherDao {
-    private static Connection con;
-    public PublisherDao() throws SQLException {
-        con = (org.mariadb.jdbc.Connection) DriverManager.getConnection("jdbc:mariadb://localhost:3306/boardgame_club", "root", "secret");
+    private Connection con;
+    public PublisherDao() {
+        try {
+            con = (org.mariadb.jdbc.Connection) DriverManager.getConnection("jdbc:mariadb://localhost:3306/boardgame_club", "root", "secret");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
-    public static void createPublisher(String name) throws SQLException {
-        String query = "INSERT INTO publishers (name) VALUES (?)";
-        con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.setString(1, name);
-        ps.executeUpdate();
+    public void createPublisher(String name) {
+        try {
+            String query = "INSERT INTO publisher (name) VALUES (?)";
+            con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-    public static Publisher findByID(int id) throws SQLException {
-        String query = "SELECT * FROM publishers WHERE ID = ?";
-        PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new Publisher(id, rs.getString("name"));
+    public Publisher findByID(int id) {
+        try {
+            String query = "SELECT * FROM publisher WHERE ID = ?";
+            PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Publisher(id, rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
-    public static List<Publisher> listPublisher() throws SQLException {
+    public List<Publisher> listPublisher() {
         List<Publisher> publishers = new ArrayList<>();
-        String query = "SELECT * FROM publishers";
-        PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
+        try {
+            String query = "SELECT * FROM publisher";
+            PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
                 publishers.add(new Publisher(rs.getInt("ID"), rs.getString("name")));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return publishers;
     }
-
-    public static Publisher findByName(String name) throws SQLException {
-        String query = "SELECT * FROM publishers WHERE name = ?";
-        PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, name);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new Publisher(rs.getInt("ID"), name);
+    public Publisher findByName(String name) {
+        try {
+            String query = "SELECT * FROM publisher WHERE name = ?";
+            PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, name);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Publisher(rs.getInt("ID"), name);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }

@@ -8,16 +8,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class GameInterface {
-    public GameInterface(){
-        try {
-            gameManagement();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    private final GameDao gameDao;
+
+    public GameInterface() {
+        this.gameDao = new GameDao();
+        gameManagement();
     }
 
-    private void gameManagement() throws SQLException {
+    private void gameManagement(){
         Scanner sc = new Scanner(System.in);
         System.out.println("╔══════════════════════════════════╗");
         System.out.println("║         GAME MANAGEMENT          ║");
@@ -49,7 +47,7 @@ public class GameInterface {
 
 
     }
-    private void createGame() throws SQLException {
+    private void createGame(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter game name");
         String name = sc.nextLine();
@@ -71,9 +69,9 @@ public class GameInterface {
                 minPlayerCount,
                 averagePlaytime
         );
-        GameDao.createGame(game);
+        gameDao.createGame(game);
     }
-    private void findGame() throws SQLException {
+    private void findGame(){
         Scanner sc = new Scanner(System.in);
         boolean run = true;
         while(run) {
@@ -88,21 +86,21 @@ public class GameInterface {
                 case "1":
                     System.out.println("enter title");
                     run=false;
-                    printGame(GameDao.searchByName(sc.nextLine()));
+                    printGame(gameDao.searchByName(sc.nextLine()));
                     break;
                 case "2":
                     System.out.println("enter ID");
-                    Game game = GameDao.searchById(sc.nextInt());
+                    Game game = gameDao.searchById(sc.nextInt());
                     printGame(game);
                     run = false;
                     break;
                 case "3":
                     System.out.println("enter publisherID");
-                    printGame(GameDao.searchByPublisher(sc.nextInt()));
+                    printGame(gameDao.searchByPublisher(sc.nextInt()));
                     run = false;
                     break;
                 case "4":
-                    printGame(GameDao.getAllGames());
+                    printGame(gameDao.getAllGames());
                     run = false;
                     break;
                 case "0":

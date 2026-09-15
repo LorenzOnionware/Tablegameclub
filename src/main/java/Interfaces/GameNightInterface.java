@@ -9,15 +9,13 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class GameNightInterface {
+    private final GameNightDao gameNightDao;
+
     public GameNightInterface() {
-        try {
-            gameNightManagement();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        this.gameNightDao = new GameNightDao();
+        gameNightManagement();
     }
-    private void gameNightManagement() throws SQLException {
+    private void gameNightManagement(){
         Scanner sc = new Scanner(System.in);
         System.out.println("╔══════════════════════════════════╗");
         System.out.println("║       GAMENIGHT MANAGEMENT       ║");
@@ -53,7 +51,7 @@ public class GameNightInterface {
             };
         }
     }
-    private void createGameNight() throws SQLException {
+    private void createGameNight(){
         Scanner sc = new Scanner(System.in);
         System.out.println("");
         System.out.println("Create GameNight");
@@ -67,9 +65,9 @@ public class GameNightInterface {
         String Game = sc.nextLine();
         System.out.println("Location:");
         String location = sc.nextLine();
-        GameNightDao.createGameNight(date, starttime, Member, Game, location);
+        gameNightDao.createGameNight(date, starttime, Member, Game, location);
     }
-    private void searchGameNight() throws SQLException {
+    private void searchGameNight(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter GameNight ID");
         PrintGameNight(gameNightDao.findGameNight(sc.nextInt()));
@@ -94,9 +92,9 @@ public class GameNightInterface {
         System.out.println(" ");
         System.out.println("================================================================");
     }
-    private void listGameNights() throws SQLException {
+    private void listGameNights(){
 
-        for(gameNight g : GameNightDao.listGameNights()){
+        for(gameNight g : gameNightDao.listGameNights()){
             PrintGameNight(g);
         }
 

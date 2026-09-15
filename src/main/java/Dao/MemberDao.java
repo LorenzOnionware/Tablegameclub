@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberDao {
-    private static Connection con;
+    private Connection con;
 
     public MemberDao() {
         try {
@@ -18,15 +18,15 @@ public class MemberDao {
         }
     }
 
-    public static List<Member> findAll() {
+    public List<Member> findAll() {
         List<Member> output = new ArrayList<>();
         ResultSet rs;
         try {
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM members");
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM member");
             rs = ps.executeQuery();
             while (rs.next()) {
                 Member m = new Member(
-                        rs.getInt("member_id"),
+                        rs.getInt("ID"),
                         rs.getString("first_name"), // Spaltennamen wie in der DB!
                         rs.getString("last_name"),
                         rs.getString("email"),
@@ -44,16 +44,16 @@ public class MemberDao {
         return output;
     }
 
-    public static Member findById(int id) {
+    public Member findById(int id) {
         try {
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM members WHERE member_id = ?");
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM member WHERE ID = ?");
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
 
                 Member m = new Member(
-                        rs.getInt("member_id"),
+                        rs.getInt("ID"),
                         rs.getString("first_name"), // Spaltennamen wie in der DB!
                         rs.getString("last_name"),
                         rs.getString("email"),
@@ -68,17 +68,17 @@ public class MemberDao {
         }
     }
 
-    public static List<Member> findByName(String Name) {
+    public List<Member> findByName(String Name) {
         List<Member> output = new ArrayList<>();
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("SELECT * FROM members Where first_name = ? OR last_name = ?");
+            ps = con.prepareStatement("SELECT * FROM member WHERE first_name = ? OR last_name = ?");
             ps.setString(1, Name);
             ps.setString(2, Name);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 Member m = new Member(
-                        rs.getInt("member_id"),
+                        rs.getInt("ID"),
                         rs.getString("first_name"), // Spaltennamen wie in der DB!
                         rs.getString("last_name"),
                         rs.getString("email"),
@@ -92,8 +92,8 @@ public class MemberDao {
         }
         return output;
     }
-    public static void createMember(Member m) {
-        String sql = "INSERT INTO members (first_name, last_name, email, join_date) VALUES (?, ?, ?, ?)";
+    public void createMember(Member m) {
+        String sql = "INSERT INTO member (first_name, last_name, email, join_date) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, m.getFirstName());
@@ -111,38 +111,52 @@ public class MemberDao {
             throw new RuntimeException(e);
         }
     }
-    public static void updateFirstname(String firstname,int member_id) throws SQLException{
-            String sql = "UPDATE members SET first_name = ? WHERE member_id = ?";
+    public void updateFirstname(String firstname, int member_id){
+        try {
+            String sql = "UPDATE member SET first_name = ? WHERE ID = ?";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ps.setString(1, firstname);
                 ps.setInt(2, member_id);
                 ps.executeUpdate();
             }
-    }
-    public static void updateLastname(String lastname,int member_id) throws SQLException{
-        String sql = "UPDATE members SET last_name = ? WHERE member_id = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, lastname);
-            ps.setInt(2, member_id);
-            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
-    public static void updateStatus(boolean stat,int member_id) throws SQLException{
-        String sql = "UPDATE members SET is_active = ? WHERE member_id = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, stat ? "1" : "0");
-            ps.setInt(2, member_id);
-            ps.executeUpdate();
+    public void updateLastname(String lastname, int member_id) {
+        try {
+            String sql = "UPDATE member SET last_name = ? WHERE ID = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, lastname);
+                ps.setInt(2, member_id);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
-    public static void updateEmail(String email,int member_id) throws SQLException{
-        String sql = "UPDATE members SET email = ? WHERE member_id = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, email);
-            ps.setInt(2, member_id);
-            ps.executeUpdate();
+    public void updateStatus(boolean stat, int member_id) {
+        try {
+            String sql = "UPDATE member SET is_active = ? WHERE ID = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, stat ? "1" : "0");
+                ps.setInt(2, member_id);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
-
+    public void updateEmail(String email, int member_id) {
+        try {
+            String sql = "UPDATE member SET email = ? WHERE ID = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, email);
+                ps.setInt(2, member_id);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
-
